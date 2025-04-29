@@ -4,32 +4,35 @@
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
-#include <thread>
 #include <string>
+#include <thread>
 
-namespace beast = boost::beast;
-namespace http = beast::http;
+namespace beast     = boost::beast;
+namespace http      = beast::http;
 namespace websocket = beast::websocket;
-namespace net = boost::asio;
-using tcp = net::ip::tcp;
+namespace net       = boost::asio;
+using tcp           = net::ip::tcp;
 
-class WebSocketClient {
+class WebSocketClient
+{
 public:
     WebSocketClient();
     ~WebSocketClient();
-    void setHost(const std::string& host);
-    void setPort(const std::string& port);
+    void setHost( const std::string& host );
+    void setPort( const std::string& port );
     void start();
     void stop();
-
+public:
+    void handleReceive();
+    void handleSend(std::string text);
 private:
     void connectAndRun();
-    void sendAndReceiveMessages(websocket::stream<tcp::socket>& ws);
-
-    std::string host_;
-    std::string port_;
-    std::thread clientThread_;
-    bool running_;
+private:
+    std::string                       host_;
+    std::string                       port_;
+    std::thread                       clientThread_;
+    bool                              running_;
+    websocket::stream< tcp::socket >* ws_;
 };
 
 #endif

@@ -105,7 +105,8 @@ int main()
     // read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_ );
     //
     client.start();
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
+    client.handleSend( "adfsas" );
     //
     client.stop();
     //

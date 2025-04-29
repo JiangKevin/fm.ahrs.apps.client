@@ -35,6 +35,7 @@ void WebSocketClient::stop()
         running_ = false;
         if ( clientThread_.joinable() )
         {
+            ws_->close( websocket::close_code::normal );
             clientThread_.join();
         }
     }
@@ -44,17 +45,13 @@ void WebSocketClient::connectAndRun()
 {
     try
     {
-        net::io_context                  ioc;
-        tcp::resolver                    resolver( ioc );
-        websocket::stream< tcp::socket > ws( ioc );
+        net::io_context ioc;
+        tcp::resolver   resolver( ioc );
+        ws_ = new websocket::stream< tcp::socket >( ioc );
 
         auto const results = resolver.resolve( host_, port_ );
-        net::connect( ws.next_layer(), results.begin(), results.end() );
-        ws.handshake( host_, "/" );
-
-        sendAndReceiveMessages( ws );
-
-        ws.close( websocket::close_code::normal );
+        net::connect( ws_->next_layer(), results.begin(), results.end() );
+        ws_->handshake( host_, "/" );
     }
     catch ( const std::exception& e )
     {
@@ -62,25 +59,33 @@ void WebSocketClient::connectAndRun()
     }
 }
 
-void WebSocketClient::sendAndReceiveMessages( websocket::stream< tcp::socket >& ws )
+void WebSocketClient::handleReceive()
 {
-    beast::flat_buffer buffer;
-    while ( running_ )
+    try
     {
-        try
+        beast::flat_buffer buffer;
+        while ( running_ )
         {
-            // 发送消息
-            ws.write( net::buffer( "Periodic message from client" ) );
-            std::this_thread::sleep_for( std::chrono::seconds( 5 ) );
-
-            // 接收消息
-            ws.read( buffer );
+            ws_->read( buffer );
             std::string message = beast::buffers_to_string( buffer.data() );
             std::cout << "Client received: " << message << std::endl;
             buffer.consume( buffer.size() );
         }
-        catch ( ... )
-        {
-        }
     }
+    catch ( const std::exception& e )
+    {
+        std::cerr << "Client receive exception: " << e.what() << std::endl;
+    }
+}
+
+void WebSocketClient::handleSend( std::string text )
+{
+    try
+    {
+        ws_->write( net::buffer( text ) );
+    }
+    catch ( ... )
+    {
+    }
+    std::this_thread::sleep_for( std::chrono::seconds( 5 ) );
 }
