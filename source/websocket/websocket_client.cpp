@@ -48,10 +48,13 @@ void WebSocketClient::connectAndRun()
         net::io_context ioc;
         tcp::resolver   resolver( ioc );
         ws_ = new websocket::stream< tcp::socket >( ioc );
-
+        //
         auto const results = resolver.resolve( host_, port_ );
         net::connect( ws_->next_layer(), results.begin(), results.end() );
         ws_->handshake( host_, "/" );
+        //
+        std::thread receiveThread( &WebSocketClient::handleReceive, this );
+        receiveThread.join();
     }
     catch ( const std::exception& e )
     {
@@ -86,6 +89,6 @@ void WebSocketClient::handleSend( std::string text )
     }
     catch ( ... )
     {
+        //
     }
-    std::this_thread::sleep_for( std::chrono::seconds( 5 ) );
 }
