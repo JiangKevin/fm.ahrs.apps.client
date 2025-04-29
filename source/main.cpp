@@ -32,7 +32,7 @@ void init_sensor( MMC56x3& sensor_mmc, ICM42670& sensor_imu )
     // Gyro ODR = 100 Hz and Full Scale Range = 2000 dps
     sensor_imu.startGyro( 100, 2000 );
     // Wait IMU to start
-    std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+    std::this_thread::sleep_for( std::chrono::milliseconds( 1000 ) );
 }
 //
 bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCalculation& ahrs_calculation, SENSOR_DB& sensor_data )
@@ -69,8 +69,8 @@ bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCalculatio
     sensor_data.gyro_z = imu_event.gyro[ 2 ] / 16.4;
     //
     ahrs_calculation.SolveAnCalculation( &sensor_data );
-    // Run @ ODR 100Hz
-    std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+    // Run @ ODR 100Hz:10
+    std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
     //
     return true;
 }
@@ -92,6 +92,7 @@ int main()
     client.setPort( port );
     client.start();
     std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
+    //
     client.handleSend( "Periodic message from client" );
     //
     init_sensor( sensor_mmc_, sensor_imu_ );
