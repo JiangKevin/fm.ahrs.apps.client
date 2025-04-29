@@ -49,15 +49,11 @@ bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCalculatio
     }
     else
     {
-        std::cout << "Cannot read magnetometer data in continuous mode" << std::endl;
-        //
         return false;
     }
     float temp = sensor_mmc.readTemperature();
     if ( std::isnan( temp ) )
     {
-        std::cout << "Cannot read temperature in continuous mode" << std::endl;
-        //
         return false;
     }
     // TDK42607
@@ -79,11 +75,6 @@ bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCalculatio
     return true;
 }
 //
-void start_websocket( WebSocketClient client )
-{
-    //
-}
-//
 int main()
 {
     std::string host = "192.168.254.116";
@@ -99,16 +90,23 @@ int main()
     WebSocketClient client;
     client.setHost( host );
     client.setPort( port );
-    //
-    // init_sensor( sensor_mmc_, sensor_imu_ );
-    //
-    // read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_ );
-    //
     client.start();
     std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
-    client.handleSend( "adfsas" );
+    client.handleSend( "Periodic message from client" );
     //
-    // client.stop();
+    init_sensor( sensor_mmc_, sensor_imu_ );
+    //
+    while ( true )
+    {
+        bool ret = read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_ );
+        if ( ret )
+        {
+            client.handleSend( sensor_data_.to_string() );
+        }
+    }
+
+    //
+    client.stop();
     //
     return 0;
 }

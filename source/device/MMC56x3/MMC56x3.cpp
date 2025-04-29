@@ -83,8 +83,9 @@ bool MMC56x3::isContinuousMode( void )
 float MMC56x3::readTemperature( void )
 {
     if ( isContinuousMode() )
+    {
         return NAN;
-
+    }
     writeRegister( MMC56X3_CTRL0_REG, 0x02 );  // TM_T trigger
 
     uint8_t status;
@@ -108,7 +109,9 @@ bool MMC56x3::getEvent( float& x, float& y, float& z )
         uint8_t status;
         status = readRegister( MMC56X3_STATUS_REG );
         if ( ! ( status & 0x40 ) )
+        {
             return false;
+        }
     }
 
     uint8_t buffer[ 9 ];
