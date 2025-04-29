@@ -96,7 +96,7 @@ int main()
     //
     init_sensor( sensor_mmc_, sensor_imu_ );
     //
-    while ( true )
+    while ( client.running_ )
     {
         bool ret = read_sensor_data( sensor_mmc_, sensor_imu_, ahrs_calculation_, sensor_data_ );
         if ( ret )

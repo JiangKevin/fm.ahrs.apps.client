@@ -36,7 +36,7 @@ void WebSocketClient::stop()
         if ( clientThread_.joinable() )
         {
             ws_->close( websocket::close_code::normal );
-            clientThread_.join();
+            // clientThread_.join();
         }
     }
 }
@@ -72,6 +72,14 @@ void WebSocketClient::handleReceive()
             ws_->read( buffer );
             std::string message = beast::buffers_to_string( buffer.data() );
             std::cout << "Client received: " << message << std::endl;
+            //
+            if ( message == "stop" )
+            {
+                stop();
+                //
+                break;
+            }
+            //
             buffer.consume( buffer.size() );
         }
     }
@@ -83,12 +91,15 @@ void WebSocketClient::handleReceive()
 
 void WebSocketClient::handleSend( std::string text )
 {
-    try
+    if ( running_ )
     {
-        ws_->write( net::buffer( text ) );
-    }
-    catch ( ... )
-    {
-        //
+        try
+        {
+            ws_->write( net::buffer( text ) );
+        }
+        catch ( ... )
+        {
+            //
+        }
     }
 }

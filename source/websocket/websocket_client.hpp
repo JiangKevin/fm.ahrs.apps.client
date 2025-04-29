@@ -24,15 +24,16 @@ public:
     void stop();
 public:
     void handleReceive();
-    void handleSend(std::string text);
+    void handleSend( std::string text );
 private:
     void connectAndRun();
 private:
     std::string                       host_;
     std::string                       port_;
     std::thread                       clientThread_;
-    bool                              running_;
     websocket::stream< tcp::socket >* ws_;
+public:
+    bool running_;
 };
 
 #endif
