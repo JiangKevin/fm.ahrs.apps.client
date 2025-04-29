@@ -107,7 +107,7 @@ int main()
     client.start();
     std::this_thread::sleep_for(std::chrono::seconds(3));
     //
-    // client.stop();
+    client.stop();
     //
     return 0;
 }
