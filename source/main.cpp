@@ -70,7 +70,7 @@ bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCalculatio
     //
     ahrs_calculation.SolveAnCalculation( &sensor_data );
     // Run @ ODR 100Hz:10
-    std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+    std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
     //
     return true;
 }

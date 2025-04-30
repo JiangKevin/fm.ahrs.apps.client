@@ -44,15 +44,23 @@ struct SENSOR_DB
     float roll;
     float pitch;
     float yaw;
+    float eacc_x;
+    float eacc_y;
+    float eacc_z;
+    float vel_x;
+    float vel_y;
+    float vel_z;
     float pos_x;
     float pos_y;
     float pos_z;
     //
     std::string to_string()
     {
-        return std::to_string( time ) + "," + std::to_string( acc_x ) + "," + std::to_string( acc_y ) + "," + std::to_string( acc_z ) + "," + std::to_string( gyro_x ) + "," + std::to_string( gyro_y ) + "," + std::to_string( gyro_z ) + "," + std::to_string( mag_x ) + "," + std::to_string( mag_y )
-               + "," + std::to_string( mag_z ) + "," + std::to_string( quate_x ) + "," + std::to_string( quate_y ) + "," + std::to_string( quate_z ) + "," + std::to_string( quate_w ) + "," + std::to_string( roll ) + "," + std::to_string( pitch ) + "," + std::to_string( yaw ) + ","
-               + std::to_string( pos_x ) + "," + std::to_string( pos_y ) + "," + std::to_string( pos_z );
+        //
+        std::string str = std::to_string( time ) + "," + std::to_string( acc_x ) + "," + std::to_string( acc_y ) + "," + std::to_string( acc_z ) + "," + std::to_string( gyro_x ) + "," + std::to_string( gyro_y ) + "," + std::to_string( gyro_z ) + "," + std::to_string( mag_x ) + ","
+                          + std::to_string( mag_y ) + "," + std::to_string( mag_z ) + "," + std::to_string( quate_x ) + "," + std::to_string( quate_y ) + "," + std::to_string( quate_z ) + "," + std::to_string( quate_w ) + "," + std::to_string( roll ) + "," + std::to_string( pitch ) + ","
+                          + std::to_string( yaw ) + "," + std::to_string( pos_x ) + "," + std::to_string( pos_y ) + "," + std::to_string( pos_z );
+        return str;
     };
     //
     std::string to_info()
@@ -64,6 +72,8 @@ struct SENSOR_DB
         info += "Magnetometer: (" + std::to_string( mag_x ) + ", " + std::to_string( mag_y ) + ", " + std::to_string( mag_z ) + ")\n";
         info += "Quaternion: (" + std::to_string( quate_x ) + ", " + std::to_string( quate_y ) + ", " + std::to_string( quate_z ) + ", " + std::to_string( quate_w ) + ")\n";
         info += "Roll: " + std::to_string( roll ) + " pitch: " + std::to_string( pitch ) + " yaw: " + std::to_string( yaw ) + "\n";
+        info += "Estimated Accelerometer: (" + std::to_string( eacc_x ) + ", " + std::to_string( eacc_y ) + ", " + std::to_string( eacc_z ) + ")\n";
+        info += "Estimated Velocity: (" + std::to_string( vel_x ) + ", " + std::to_string( vel_y ) + ", " + std::to_string( vel_z ) + ")\n";
         info += "Position: (" + std::to_string( pos_x ) + ", " + std::to_string( pos_y ) + ", " + std::to_string( pos_z ) + ")\n";
         return info;
     }
@@ -73,7 +83,7 @@ struct SENSOR_DB
         char delimiter = ',';
         auto values    = splitString( v, delimiter );
         //
-        if ( values.size() == 20 )
+        if ( values.size() == 26 )
         {
             time    = std::stof( values[ 0 ] );
             acc_x   = std::stof( values[ 1 ] );
@@ -92,9 +102,15 @@ struct SENSOR_DB
             roll    = std::stof( values[ 14 ] );
             pitch   = std::stof( values[ 15 ] );
             yaw     = std::stof( values[ 16 ] );
-            pos_x   = std::stof( values[ 17 ] );
-            pos_y   = std::stof( values[ 18 ] );
-            pos_z   = std::stof( values[ 19 ] );
+            eacc_x  = std::stof( values[ 17 ] );
+            eacc_y  = std::stof( values[ 18 ] );
+            eacc_z  = std::stof( values[ 19 ] );
+            vel_x   = std::stof( values[ 20 ] );
+            vel_y   = std::stof( values[ 21 ] );
+            vel_z   = std::stof( values[ 22 ] );
+            pos_x   = std::stof( values[ 23 ] );
+            pos_y   = std::stof( values[ 24 ] );
+            pos_z   = std::stof( values[ 25 ] );
         }
     }
 };
@@ -119,14 +135,16 @@ public:
     ~AhrsCalculation(){};
 public:
     // Define calibration (replace with actual calibration data if available)
-    const FusionMatrix gyroscopeMisalignment     = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-    const FusionVector gyroscopeSensitivity      = { 1.0f, 1.0f, 1.0f };
-    const FusionVector gyroscopeOffset           = { 0.0f, 0.0f, 0.0f };
+    const FusionMatrix gyroscopeMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+    const FusionVector gyroscopeSensitivity  = { 1.0f, 1.0f, 1.0f };
+    const FusionVector gyroscopeOffset       = { 0.0f, 0.0f, 0.0f };
+    //
     const FusionMatrix accelerometerMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     const FusionVector accelerometerSensitivity  = { 1.0f, 1.0f, 1.0f };
     const FusionVector accelerometerOffset       = { 0.0f, 0.0f, 0.0f };
-    const FusionMatrix softIronMatrix            = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-    const FusionVector hardIronOffset            = { 0.0f, 0.0f, 0.0f };
+    //
+    const FusionMatrix softIronMatrix = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
+    const FusionVector hardIronOffset = { 0.0f, 0.0f, 0.0f };
 public:
     // Initialise algorithms
     FusionOffset offset;
