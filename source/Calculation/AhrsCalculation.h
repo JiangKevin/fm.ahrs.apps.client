@@ -61,15 +61,17 @@ struct SENSOR_DB
     float roll    = 0.0f;
     float pitch   = 0.0f;
     float yaw     = 0.0f;
-    float eacc_x  = 0.0f;
-    float eacc_y  = 0.0f;
-    float eacc_z  = 0.0f;
-    float vel_x   = 0.0f;
-    float vel_y   = 0.0f;
-    float vel_z   = 0.0f;
-    float pos_x   = 0.0f;
-    float pos_y   = 0.0f;
-    float pos_z   = 0.0f;
+
+    float eacc_x = 0.0f;
+    float eacc_y = 0.0f;
+    float eacc_z = 0.0f;
+
+    float vel_x = 0.0f;
+    float vel_y = 0.0f;
+    float vel_z = 0.0f;
+    float pos_x = 0.0f;
+    float pos_y = 0.0f;
+    float pos_z = 0.0f;
     //
     std::string to_string()
     {
@@ -170,7 +172,7 @@ public:
     //
     const FusionMatrix accelerometerMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     const FusionVector accelerometerSensitivity  = { 1.0f, 1.0f, 1.0f };
-    const FusionVector accelerometerOffset       = { 0.0f, 0.0f, 0.0f };
+    const FusionVector accelerometerOffset       = { 0.0f, 0.0f, 0.98f };
     //
     const FusionMatrix softIronMatrix = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     const FusionVector hardIronOffset = { 0.0f, 0.0f, 0.0f };
@@ -188,8 +190,7 @@ public:
         .recoveryTriggerPeriod = 5 * SAMPLE_RATE, /* 5 seconds */
     };
 public:
-    void       SolveAnCalculation( SENSOR_DB* sensor_data );
-    MotionData AccelerationToDisplacement( const std::function< float( float ) >& a_func, float t_start, float t_end, size_t num_points, float v0 = 0.0, float s0 = 0.0 );
+    void SolveAnCalculation( SENSOR_DB* sensor_data );
 private:
-    std::vector< float > Integrate( const std::vector< float >& f, const std::vector< float >& t, float initial = 0.0 );
+    void calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt );
 };
