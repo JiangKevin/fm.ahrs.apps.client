@@ -78,7 +78,7 @@ bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCalculatio
 int main()
 {
     std::string host = "192.168.254.116";
-    std::string port = "8080";
+    std::string port = "18080";
     std::string text = "Hello, WebSocket Server!";
     //
     MMC56x3         sensor_mmc_;
@@ -93,9 +93,9 @@ int main()
     client.start();
     std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
     //
-    client.handleSend( "Periodic message from client" );
-    //
     init_sensor( sensor_mmc_, sensor_imu_ );
+    //
+    client.handleSend( "Start" );
     //
     while ( client.running_ )
     {

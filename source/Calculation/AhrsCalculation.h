@@ -5,6 +5,8 @@
 #include "Fusion/Fusion.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include <cctype>
+#include <cmath>
+#include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -25,56 +27,73 @@ static std::vector< std::string > splitString( const std::string& str, char deli
     return result;
 }
 //
+static std::string transaction_to_string( float value )
+{
+    std::string out;
+    if ( std::isnan( value ) )
+    {
+        out = "0";
+    }
+    else
+    {
+        out = std::to_string( value );
+    }
+}
+//
 struct SENSOR_DB
 {
-    float time;
-    float acc_x;
-    float acc_y;
-    float acc_z;
-    float gyro_x;
-    float gyro_y;
-    float gyro_z;
-    float mag_x;
-    float mag_y;
-    float mag_z;
-    float quate_x;
-    float quate_y;
-    float quate_z;
-    float quate_w;
-    float roll;
-    float pitch;
-    float yaw;
-    float eacc_x;
-    float eacc_y;
-    float eacc_z;
-    float vel_x;
-    float vel_y;
-    float vel_z;
-    float pos_x;
-    float pos_y;
-    float pos_z;
+    float time    = 0.0f;
+    float acc_x   = 0.0f;
+    float acc_y   = 0.0f;
+    float acc_z   = 0.0f;
+    float gyro_x  = 0.0f;
+    float gyro_y  = 0.0f;
+    float gyro_z  = 0.0f;
+    float mag_x   = 0.0f;
+    float mag_y   = 0.0f;
+    float mag_z   = 0.0f;
+    float quate_x = 0.0f;
+    float quate_y = 0.0f;
+    float quate_z = 0.0f;
+    float quate_w = 0.0f;
+    float roll    = 0.0f;
+    float pitch   = 0.0f;
+    float yaw     = 0.0f;
+    float eacc_x  = 0.0f;
+    float eacc_y  = 0.0f;
+    float eacc_z  = 0.0f;
+    float vel_x   = 0.0f;
+    float vel_y   = 0.0f;
+    float vel_z   = 0.0f;
+    float pos_x   = 0.0f;
+    float pos_y   = 0.0f;
+    float pos_z   = 0.0f;
     //
     std::string to_string()
     {
-        //
-        std::string str = std::to_string( time ) + "," + std::to_string( acc_x ) + "," + std::to_string( acc_y ) + "," + std::to_string( acc_z ) + "," + std::to_string( gyro_x ) + "," + std::to_string( gyro_y ) + "," + std::to_string( gyro_z ) + "," + std::to_string( mag_x ) + ","
-                          + std::to_string( mag_y ) + "," + std::to_string( mag_z ) + "," + std::to_string( quate_x ) + "," + std::to_string( quate_y ) + "," + std::to_string( quate_z ) + "," + std::to_string( quate_w ) + "," + std::to_string( roll ) + "," + std::to_string( pitch ) + ","
-                          + std::to_string( yaw ) + "," + std::to_string( pos_x ) + "," + std::to_string( pos_y ) + "," + std::to_string( pos_z );
+        std::string str = transaction_to_string( time ) + ",";
+        str += transaction_to_string( acc_x ) + "," + transaction_to_string( acc_y ) + "," + transaction_to_string( acc_z ) + ",";
+        str += transaction_to_string( gyro_x ) + "," + transaction_to_string( gyro_y ) + "," + transaction_to_string( gyro_z ) + ",";
+        str += transaction_to_string( mag_x ) + "," + transaction_to_string( mag_y ) + "," + transaction_to_string( mag_z ) + ",";
+        str += transaction_to_string( quate_x ) + "," + transaction_to_string( quate_y ) + "," + transaction_to_string( quate_z ) + "," + transaction_to_string( quate_w ) + ",";
+        str += transaction_to_string( roll ) + "," + transaction_to_string( pitch ) + "," + transaction_to_string( yaw ) + ",";
+        str += transaction_to_string( eacc_x ) + "," + transaction_to_string( eacc_y ) + "," + transaction_to_string( eacc_z ) + ",";
+        str += transaction_to_string( vel_x ) + "," + transaction_to_string( vel_y ) + "," + transaction_to_string( vel_z ) + ",";
+        str += transaction_to_string( pos_x ) + "," + transaction_to_string( pos_y ) + "," + transaction_to_string( pos_z );
         return str;
     };
     //
     std::string to_info()
     {
-        //
-        std::string info = "Time: " + std::to_string( time ) + "\n";
-        info += "Accelerometer: (" + std::to_string( acc_x ) + ", " + std::to_string( acc_y ) + ", " + std::to_string( acc_z ) + ")\n";
-        info += "Gyroscope: (" + std::to_string( gyro_x ) + ", " + std::to_string( gyro_y ) + ", " + std::to_string( gyro_z ) + ")\n";
-        info += "Magnetometer: (" + std::to_string( mag_x ) + ", " + std::to_string( mag_y ) + ", " + std::to_string( mag_z ) + ")\n";
-        info += "Quaternion: (" + std::to_string( quate_x ) + ", " + std::to_string( quate_y ) + ", " + std::to_string( quate_z ) + ", " + std::to_string( quate_w ) + ")\n";
-        info += "Roll: " + std::to_string( roll ) + " pitch: " + std::to_string( pitch ) + " yaw: " + std::to_string( yaw ) + "\n";
-        info += "Estimated Accelerometer: (" + std::to_string( eacc_x ) + ", " + std::to_string( eacc_y ) + ", " + std::to_string( eacc_z ) + ")\n";
-        info += "Estimated Velocity: (" + std::to_string( vel_x ) + ", " + std::to_string( vel_y ) + ", " + std::to_string( vel_z ) + ")\n";
-        info += "Position: (" + std::to_string( pos_x ) + ", " + std::to_string( pos_y ) + ", " + std::to_string( pos_z ) + ")\n";
+        std::string info = "Time: " + transaction_to_string( time ) + "\n";
+        info += "Accelerometer: (" + transaction_to_string( acc_x ) + ", " + transaction_to_string( acc_y ) + ", " + transaction_to_string( acc_z ) + ")\n";
+        info += "Gyroscope: (" + transaction_to_string( gyro_x ) + ", " + transaction_to_string( gyro_y ) + ", " + transaction_to_string( gyro_z ) + ")\n";
+        info += "Magnetometer: (" + transaction_to_string( mag_x ) + ", " + transaction_to_string( mag_y ) + ", " + transaction_to_string( mag_z ) + ")\n";
+        info += "Quaternion: (" + transaction_to_string( quate_x ) + ", " + transaction_to_string( quate_y ) + ", " + transaction_to_string( quate_z ) + ", " + transaction_to_string( quate_w ) + ")\n";
+        info += "Roll: " + transaction_to_string( roll ) + " pitch: " + transaction_to_string( pitch ) + " yaw: " + transaction_to_string( yaw ) + "\n";
+        info += "Estimated Accelerometer: (" + transaction_to_string( eacc_x ) + ", " + transaction_to_string( eacc_y ) + ", " + transaction_to_string( eacc_z ) + ")\n";
+        info += "Estimated Velocity: (" + transaction_to_string( vel_x ) + ", " + transaction_to_string( vel_y ) + ", " + transaction_to_string( vel_z ) + ")\n";
+        info += "Position: (" + transaction_to_string( pos_x ) + ", " + transaction_to_string( pos_y ) + ", " + transaction_to_string( pos_z ) + ")\n";
         return info;
     }
     //
@@ -113,6 +132,14 @@ struct SENSOR_DB
             pos_z   = std::stof( values[ 25 ] );
         }
     }
+};
+// 从加速度计算位移的函数
+struct MotionData
+{
+    std::vector< float > time;
+    std::vector< float > acceleration;
+    std::vector< float > velocity;
+    std::vector< float > displacement;
 };
 // 验证字符串是否为数字
 static bool isNumber( const std::string& str )
@@ -159,5 +186,8 @@ public:
         .recoveryTriggerPeriod = 5 * SAMPLE_RATE, /* 5 seconds */
     };
 public:
-    void SolveAnCalculation( SENSOR_DB* sensor_data );
+    void       SolveAnCalculation( SENSOR_DB* sensor_data );
+    MotionData AccelerationToDisplacement( const std::function< float( float ) >& a_func, float t_start, float t_end, size_t num_points, float v0 = 0.0, float s0 = 0.0 );
+private:
+    std::vector< float > Integrate( const std::vector< float >& f, const std::vector< float >& t, float initial = 0.0 );
 };

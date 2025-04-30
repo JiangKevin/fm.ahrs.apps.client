@@ -32,6 +32,7 @@ private:
     std::string                       port_;
     std::thread                       clientThread_;
     websocket::stream< tcp::socket >* ws_;
+    std::mutex                        ctrlMutex_;
 public:
     bool running_;
 };

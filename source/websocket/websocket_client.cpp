@@ -32,6 +32,7 @@ void WebSocketClient::stop()
 {
     if ( running_ )
     {
+        std::lock_guard< std::mutex > lock( ctrlMutex_ );
         running_ = false;
         if ( clientThread_.joinable() )
         {
@@ -45,6 +46,8 @@ void WebSocketClient::connectAndRun()
 {
     try
     {
+        // std::lock_guard< std::mutex > lock( ctrlMutex_ );
+        // 
         net::io_context ioc;
         tcp::resolver   resolver( ioc );
         ws_ = new websocket::stream< tcp::socket >( ioc );
@@ -52,6 +55,8 @@ void WebSocketClient::connectAndRun()
         auto const results = resolver.resolve( host_, port_ );
         net::connect( ws_->next_layer(), results.begin(), results.end() );
         ws_->handshake( host_, "/" );
+        // 
+        printf( "Client connected to %s:%s\n", host_.c_str(), port_.c_str() );
         //
         std::thread receiveThread( &WebSocketClient::handleReceive, this );
         receiveThread.join();
@@ -93,6 +98,7 @@ void WebSocketClient::handleSend( std::string text )
 {
     if ( running_ )
     {
+        std::lock_guard< std::mutex > lock( ctrlMutex_ );
         try
         {
             ws_->write( net::buffer( text ) );
