@@ -5,16 +5,32 @@
 #include "Fusion/Fusion.h"
 #include "concurrentqueue/concurrentqueue.h"
 #include <cctype>
+#include <chrono>
 #include <cmath>
 #include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <sys/time.h>
 #include <vector>
 //
 #define SAMPLE_RATE ( 100 )  // replace this with actual sample rate
-//
 
+// 以纳秒级精度获取当前时间戳
+static long long getNanosecondTimestamp()
+{
+    auto now      = std::chrono::high_resolution_clock::now();
+    auto duration = now.time_since_epoch();
+    return std::chrono::duration_cast< std::chrono::nanoseconds >( duration ).count();
+}
+// 以微秒级精度获取当前时间戳
+static int64_t getMicrosecondTimestamp()
+{
+    auto now      = std::chrono::system_clock::now();
+    auto duration = now.time_since_epoch();
+    return std::chrono::duration_cast< std::chrono::microseconds >( duration ).count();
+}
+//
 static std::vector< std::string > splitString( const std::string& str, char delimiter )
 {
     std::vector< std::string > result;
@@ -44,16 +60,17 @@ static std::string transaction_to_string( float value )
 //
 struct SENSOR_DB
 {
-    float time    = 0.0f;
-    float acc_x   = 0.0f;
-    float acc_y   = 0.0f;
-    float acc_z   = 0.0f;
-    float gyro_x  = 0.0f;
-    float gyro_y  = 0.0f;
-    float gyro_z  = 0.0f;
-    float mag_x   = 0.0f;
-    float mag_y   = 0.0f;
-    float mag_z   = 0.0f;
+    int64_t time;
+    float   acc_x  = 0.0f;
+    float   acc_y  = 0.0f;
+    float   acc_z  = 0.0f;
+    float   gyro_x = 0.0f;
+    float   gyro_y = 0.0f;
+    float   gyro_z = 0.0f;
+    float   mag_x  = 0.0f;
+    float   mag_y  = 0.0f;
+    float   mag_z  = 0.0f;
+
     float quate_x = 0.0f;
     float quate_y = 0.0f;
     float quate_z = 0.0f;
@@ -172,7 +189,7 @@ public:
     //
     const FusionMatrix accelerometerMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     const FusionVector accelerometerSensitivity  = { 1.0f, 1.0f, 1.0f };
-    const FusionVector accelerometerOffset       = { 0.0f, 0.0f, 0.98f };
+    const FusionVector accelerometerOffset       = { 0.0f, 0.0f, 0.02f };
     //
     const FusionMatrix softIronMatrix = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     const FusionVector hardIronOffset = { 0.0f, 0.0f, 0.0f };

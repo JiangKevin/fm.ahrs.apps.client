@@ -101,6 +101,7 @@ void WebSocketClient::handleSend( std::string text )
         std::lock_guard< std::mutex > lock( ctrlMutex_ );
         try
         {
+            // printf( "Client sending: %s\n", text.c_str() );
             ws_->write( net::buffer( text ) );
         }
         catch ( ... )
