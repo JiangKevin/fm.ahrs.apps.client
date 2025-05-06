@@ -16,6 +16,7 @@ uint8_t           deviceAddress_mmc = 0x30;
 uint8_t           deviceAddress_imu = 0x69;
 //
 rapidcsv::Document csv_doc_;
+
 //
 void init_out_csv( rapidcsv::Document& csv_doc )
 {
@@ -55,7 +56,7 @@ void init_out_csv( rapidcsv::Document& csv_doc )
     csv_doc.SetColumnName( 24, "Estimated Position Y (m)" );
     csv_doc.SetColumnName( 25, "Estimated Position Z (m)" );
 }
-void update_out_csv( int index, rapidcsv::Document& csv_doc, const SENSOR_DB& sensor_data )
+void update_out_csv( int& index, rapidcsv::Document& csv_doc, const SENSOR_DB& sensor_data )
 {
 
     // 添加数据行
@@ -167,7 +168,7 @@ bool read_sensor_data( MMC56x3& sensor_mmc, ICM42670& sensor_imu, AhrsCalculatio
 void signalHandler_for_gloab( int signum )
 {
     std::cout << "收到 Ctrl+C 信号，程序即将退出..." << std::endl;
-    //
+    // 关闭 CSV 文件
     close_out_csv( csv_doc_ );
     // 退出程序
     exit( signum );
