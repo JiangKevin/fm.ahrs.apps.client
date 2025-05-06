@@ -53,6 +53,7 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "chrono": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "csignal": "cpp"
     }
 }

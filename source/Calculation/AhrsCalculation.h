@@ -189,15 +189,20 @@ public:
     //
     const FusionMatrix accelerometerMisalignment = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     const FusionVector accelerometerSensitivity  = { 1.0f, 1.0f, 1.0f };
-    const FusionVector accelerometerOffset       = { 0.0f, 0.0f, 0.02f };
+    const FusionVector accelerometerOffset       = { 0.0f, 0.0f, 0.0f };
     //
     const FusionMatrix softIronMatrix = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
     const FusionVector hardIronOffset = { 0.0f, 0.0f, 0.0f };
+    // 初始速度
+    FusionVector initialVelocity = { 0.0f, 0.0f, 0.0f };
+    // 初始位置
+    FusionVector initialPosition = { 0.0f, 0.0f, 0.0f };
 public:
     // Initialise algorithms
     FusionOffset offset;
     FusionAhrs   ahrs;
-    int64_t previousTimestamp;
+    int64_t      previousTimestamp;
+    float        deltaTime;
     // Set AHRS algorithm settings
     const FusionAhrsSettings settings = {
         .convention            = FusionConventionNwu,
@@ -209,6 +214,7 @@ public:
     };
 public:
     void SolveAnCalculation( SENSOR_DB* sensor_data );
+    void ResetInitial();
 private:
     void calculateSurfaceVelocity( SENSOR_DB* sensor_data, float dt );
 };

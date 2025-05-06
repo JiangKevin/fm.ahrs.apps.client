@@ -16,6 +16,8 @@ uint8_t           deviceAddress_mmc = 0x30;
 uint8_t           deviceAddress_imu = 0x69;
 //
 rapidcsv::Document csv_doc_;
+WebSocketClient    client;
+AhrsCalculation    ahrs_calculation_;
 
 //
 void init_out_csv( rapidcsv::Document& csv_doc )
@@ -173,6 +175,28 @@ void signalHandler_for_gloab( int signum )
     // 退出程序
     exit( signum );
 }
+
+//
+// 子线程函数，处理控制台输入响应
+void handleInput()
+{
+    std::string input;
+    while ( true )
+    {
+        std::cout << "请输入一些内容（输入 'exit' 退出）: ";
+        std::cin >> input;
+        if ( input == "exit" )
+        {
+            client.stop();
+            break;
+        }
+        else if ( input == "reset" )
+        {
+            ahrs_calculation_.ResetInitial();
+        }
+        std::cout << "你输入了: " << input << std::endl;
+    }
+}
 //
 int main()
 {
@@ -187,13 +211,13 @@ int main()
     std::string text = "Hello, WebSocket Server!";
 
     //
-    MMC56x3         sensor_mmc_;
-    ICM42670        sensor_imu_;
-    AhrsCalculation ahrs_calculation_;
+    MMC56x3  sensor_mmc_;
+    ICM42670 sensor_imu_;
+
     //
     SENSOR_DB sensor_data_;
     //
-    WebSocketClient client;
+
     client.setHost( host );
     client.setPort( port );
     client.start();
@@ -202,6 +226,9 @@ int main()
     init_sensor( sensor_mmc_, sensor_imu_ );
     //
     client.handleSend( "Start" );
+    //
+    // 创建子线程
+    std::thread inputThread( handleInput );
     //
     while ( client.running_ )
     {
