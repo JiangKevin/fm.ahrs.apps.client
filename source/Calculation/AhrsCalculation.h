@@ -197,6 +197,7 @@ public:
     // Initialise algorithms
     FusionOffset offset;
     FusionAhrs   ahrs;
+    int64_t previousTimestamp;
     // Set AHRS algorithm settings
     const FusionAhrsSettings settings = {
         .convention            = FusionConventionNwu,
